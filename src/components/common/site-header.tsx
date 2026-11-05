@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 /**
  * Site-wide brand header.
@@ -6,12 +9,23 @@ import Image from "next/image";
 export function SiteHeader() {
   return (
     <header className="relative z-10 mx-auto flex w-full max-w-site items-center justify-between px-gutter py-5 sm:px-8 lg:px-14 lg:py-8">
-      <div
-        aria-label="Grand Theft Auto VI"
-        className="grid size-10 place-items-center border border-white/55 text-sm font-black tracking-[-0.15em] sm:size-11"
+      <motion.div
+        animate={{ rotateY: [0, 360] }}
+        className="grid size-10 shrink-0 place-items-center sm:size-11"
+        style={{ perspective: 1000 }}
+        transition={{
+          rotateY: { repeat: Infinity, duration: 6, ease: "linear" },
+        }}
       >
-        VI
-      </div>
+        <Image
+          alt="Grand Theft Auto VI"
+          className="h-auto w-8"
+          height={381}
+          src="/images/gta-vi-header-logo.png"
+          unoptimized
+          width={602}
+        />
+      </motion.div>
 
       <Image
         alt="TorquiRS"
