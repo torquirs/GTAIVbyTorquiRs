@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowDownRight } from "lucide-react";
+import { Connections } from "@/components/features/connections/connections";
 import { Countdown } from "@/components/features/countdown/countdown";
 import { Gallery } from "@/components/features/gallery/gallery";
 import { siteConfig } from "@/config/site";
@@ -56,6 +57,9 @@ export function Hero() {
         </div>
 
         <div className="relative order-1 px-2 pb-3 pr-3 lg:order-2 lg:px-0 lg:pb-4 lg:pr-4">
+          <div className="relative z-10">
+            <Connections />
+          </div>
           <div className="absolute -right-5 top-6 h-1/2 w-1/2 bg-[#282039]/70 blur-3xl" />
           <Gallery />
         </div>
