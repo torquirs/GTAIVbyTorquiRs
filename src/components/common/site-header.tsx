@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 /**
@@ -16,11 +17,14 @@ export function SiteHeader() {
         </span>
       </Link>
 
-      <div className="font-mono text-[10px] tracking-[0.35em] text-white/55 sm:text-xs">
-        R<span className="text-neon-pink">*</span>
-        <span className="mx-3 text-white/20">/</span>
-        2026
-      </div>
+      <Image
+        alt="TorquiRS"
+        className="h-auto w-24 sm:w-28"
+        height={175}
+        src="/images/torquirs-logo-header.png"
+        unoptimized
+        width={306}
+      />
     </header>
   );
 }
