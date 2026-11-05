@@ -1,26 +1,210 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --site-ink: #09070e;
+  --site-paper: #fff9f5;
+  --site-muted: #a9a0ad;
+  --site-neon-pink: #f04e9a;
+  --site-neon-coral: #ed3f91;
+  --site-pink-soft: #f3819b;
+  --site-neon-cyan: #95e9df;
+  --site-intro-midnight: #0b0b14;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--site-ink);
+  --color-foreground: var(--site-paper);
+  --color-ink: var(--site-ink);
+  --color-paper: var(--site-paper);
+  --color-muted: var(--site-muted);
+  --color-neon-pink: var(--site-neon-pink);
+  --color-neon-coral: var(--site-neon-coral);
+  --color-pink-soft: var(--site-pink-soft);
+  --color-neon-cyan: var(--site-neon-cyan);
+  --color-intro-midnight: var(--site-intro-midnight);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-display: Impact, "Arial Narrow", sans-serif;
+  --container-site: 90rem;
+  --spacing-gutter: 1.25rem;
+  --radius-panel: 0.125rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--site-ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 75% 35%, rgb(31 20 48 / 60%), transparent 48%),
+    radial-gradient(ellipse at 3% 70%, rgb(81 17 64 / 26%), transparent 38%),
+    var(--site-ink);
+  color: var(--site-paper);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--site-neon-pink);
+  color: var(--site-ink);
+}
+
+.display-type {
+  font-family: var(--font-display);
+  font-stretch: condensed;
+  text-transform: uppercase;
+}
+
+.tracking-label {
+  letter-spacing: 0.32em;
+}
+
+.hero-glow {
+  background: radial-gradient(
+    ellipse,
+    rgb(240 78 154 / 19%),
+    transparent 68%
+  );
+  filter: blur(35px);
+  animation: glow-drift 9s ease-in-out infinite alternate;
+}
+
+.marquee-track {
+  animation: marquee 34s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.intro-screen {
+  background:
+    radial-gradient(ellipse at 50% 48%, rgb(33 30 64 / 35%), transparent 48%),
+    var(--site-intro-midnight);
+}
+
+.intro-screen-flash {
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at center, rgb(255 255 255 / 65%), transparent 58%),
+    linear-gradient(110deg, transparent 20%, rgb(240 78 154 / 36%) 50%, transparent 80%);
+  mix-blend-mode: screen;
+}
+
+.intro-screen-flashing .intro-screen-flash {
+  animation: intro-screen-flash 300ms ease-out both;
+}
+
+.intro-logo-glow {
+  animation: intro-logo-breathe 2s ease-in-out infinite;
+}
+
+.intro-logo-sweep {
+  background: linear-gradient(
+    112deg,
+    transparent 34%,
+    rgb(149 233 223 / 12%) 43%,
+    rgb(255 255 255 / 52%) 49%,
+    rgb(240 78 154 / 26%) 55%,
+    transparent 64%
+  );
+  filter: blur(1px);
+  mask-image: url("/images/rockstar-mark.png");
+  mask-mode: alpha;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-image: url("/images/rockstar-mark.png");
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  animation: intro-logo-wave 2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.ambient-particle {
+  box-shadow: 0 0 8px rgb(149 233 223 / 24%);
+  animation: ambient-particle-drift ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes glow-drift {
+  from {
+    transform: translate3d(-2%, 0, 0) scale(0.94);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+  }
+}
+
+@keyframes intro-screen-flash {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-logo-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgb(149 233 223 / 12%));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 9px rgb(149 233 223 / 20%))
+      drop-shadow(0 0 14px rgb(240 78 154 / 10%));
+  }
+}
+
+@keyframes intro-logo-wave {
+  0% {
+    opacity: 0;
+    transform: translate3d(-70%, 0, 0);
+  }
+  20% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.52;
+    transform: translate3d(0, 0, 0);
+  }
+  80% {
+    opacity: 0.08;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(70%, 0, 0);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .intro-logo-glow,
+  .intro-logo-sweep {
+    animation: none;
+  }
 }
