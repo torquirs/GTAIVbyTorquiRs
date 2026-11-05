@@ -19,11 +19,11 @@ export function SiteHeader() {
 
       <Image
         alt="TorquiRS"
-        className="h-auto w-24 sm:w-28"
-        height={175}
+        className="absolute left-1/2 h-auto w-20 -translate-x-1/2 sm:w-24 md:static md:ml-auto md:w-28 md:translate-x-0"
+        height={368}
         src="/images/torquirs-logo-header.png"
         unoptimized
-        width={306}
+        width={438}
       />
     </header>
   );
