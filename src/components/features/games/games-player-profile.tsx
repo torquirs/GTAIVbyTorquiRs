@@ -500,6 +500,9 @@ export function GamesPlayerProfile({
         <DialogContent
           className={`top-[calc(50%-2rem)] w-[calc(100%-2rem)] max-w-sm gap-3 ${PROFILE_CARD_SURFACE_CLASS} p-4 text-white shadow-[0_18px_70px_rgba(0,0,0,0.5),0_0_30px_rgba(34,211,238,0.06)] sm:max-w-sm sm:p-5`}
           overlayClassName="bg-black/30 backdrop-blur-[1px]"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+          }}
           onEscapeKeyDown={(event) => {
             if (!profile || isSaving) {
               event.preventDefault();
@@ -536,7 +539,6 @@ export function GamesPlayerProfile({
               </div>
               <Input
                 autoComplete="nickname"
-                autoFocus
                 className="h-10 min-h-10 text-xs"
                 disabled={isSaving}
                 id="player-username"
