@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 /**
@@ -26,6 +27,19 @@ export function SiteHeader() {
           width={602}
         />
       </motion.div>
+
+      <nav aria-label="Primary navigation" className="ml-auto md:ml-6">
+        <Link
+          className="group inline-flex items-center gap-2 py-2 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/65 transition-colors hover:text-white sm:text-[10px]"
+          href="/games"
+        >
+          Games
+          <span
+            aria-hidden="true"
+            className="h-px w-4 bg-sky-400 transition-all group-hover:w-7 group-hover:bg-sky-200"
+          />
+        </Link>
+      </nav>
 
       <Image
         alt="TorquiRS"
