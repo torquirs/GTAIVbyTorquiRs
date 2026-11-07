@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { House, Settings } from "lucide-react";
+import { House } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -202,7 +202,7 @@ export function GamesNavigationDock() {
           transition={{ duration: 0.18, ease: "easeOut" }}
         >
           <button
-            aria-label="Settings, coming soon"
+            aria-label="PlayStation controller, settings coming soon"
             aria-pressed={settingsOpen}
             className={`relative grid size-14 cursor-pointer place-items-center rounded-full border bg-[#11131b]/75 shadow-[0_8px_30px_rgba(0,0,0,0.38)] outline-none backdrop-blur-md transition-[color,border-color,background-color,filter,transform] duration-150 ease-out focus-visible:drop-shadow-[0_0_8px_rgba(255,255,255,0.7)] sm:size-16 ${
               settingsOpen
@@ -215,11 +215,13 @@ export function GamesNavigationDock() {
             }
             type="button"
           >
-            <Settings
-              aria-hidden="true"
-              className="relative z-10"
-              size={22}
-              strokeWidth={1.7}
+            <Image
+              alt="PS5 controller"
+              className="relative z-10 h-10 w-10 rotate-12 object-contain transition-transform duration-150 ease-out sm:h-12 sm:w-12"
+              height={384}
+              src="/images/ps5.png"
+              unoptimized
+              width={624}
             />
           </button>
         </motion.div>
