@@ -7,7 +7,7 @@ import { House, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-type HoverSound = "home" | "brand" | "settings";
+type HoverSound = "home" | "home-select" | "brand" | "settings";
 
 interface AudioContextWindow extends Window {
   webkitAudioContext?: typeof AudioContext;
@@ -43,6 +43,12 @@ async function playHoverSound(
 
     const tones = {
       home: { start: 520, end: 760, duration: 0.075, type: "sine" },
+      "home-select": {
+        start: 740,
+        end: 520,
+        duration: 0.09,
+        type: "triangle",
+      },
       brand: { start: 880, end: 1320, duration: 0.12, type: "sine" },
       settings: { start: 420, end: 320, duration: 0.055, type: "triangle" },
     } as const;
@@ -118,6 +124,11 @@ export function GamesNavigationDock() {
                 : "border-white/15 text-white/65 hover:border-white/30 hover:bg-[#181b25]/85 hover:text-white"
             }`}
             href="/"
+            onClick={() => {
+              if (pathname !== "/") {
+                void playHoverSound(audioContextRef, "home-select");
+              }
+            }}
             onMouseEnter={() => void playHoverSound(audioContextRef, "home")}
           >
             <House
