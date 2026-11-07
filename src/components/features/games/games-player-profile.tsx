@@ -26,6 +26,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -540,7 +547,7 @@ export function GamesPlayerProfile({
       </AnimatePresence>
 
       {profile && (
-        <Popover
+        <DropdownMenu
           open={profilePopoverOpen}
           onOpenChange={(open) => {
             if (!isDeleting) {
@@ -548,7 +555,7 @@ export function GamesPlayerProfile({
             }
           }}
         >
-          <PopoverTrigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button
               aria-label={`Player profile for ${profile.username}`}
               className="fixed right-5 top-5 z-40 grid size-12 min-h-0 place-items-center rounded-full border border-white/15 bg-transparent p-0 text-white shadow-[0_0_18px_rgba(34,211,238,0.12)] backdrop-blur-none hover:border-neon-cyan/50 hover:bg-transparent hover:shadow-[0_0_22px_rgba(34,211,238,0.22)] sm:right-7 sm:top-7"
@@ -565,103 +572,95 @@ export function GamesPlayerProfile({
                 </AvatarFallback>
               </Avatar>
             </Button>
-          </PopoverTrigger>
-          <AnimatePresence>
-            {profilePopoverOpen && (
-              <PopoverContent
-                align="end"
-                className={`w-[min(18rem,calc(100vw-2rem))] ${PROFILE_CARD_SURFACE_CLASS} p-0`}
-                forceMount
-                sideOffset={12}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className={`w-[min(18rem,calc(100vw-2rem))] ${PROFILE_CARD_SURFACE_CLASS} p-1.5`}
+            sideOffset={12}
+          >
+            <div className="flex items-center gap-3 px-2.5 py-2">
+              <Avatar className="size-10 border-neon-cyan/35" size="default">
+                <AvatarImage
+                  alt={profile.username}
+                  src={getAvatar(profile.avatar, avatars).image}
+                />
+                <AvatarFallback>
+                  {profile.username.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/45">
+                  Player profile
+                </p>
+                <div className="mt-1 flex min-w-0 items-center gap-2">
+                  <p className="truncate text-sm font-bold text-white">
+                    {profile.username}
+                  </p>
+                  <Image
+                    alt={`${profileConsole.label} logo`}
+                    className="size-5 shrink-0 object-contain"
+                    height={20}
+                    src={profileConsole.image}
+                    width={20}
+                  />
+                </div>
+              </div>
+              <ShieldCheck
+                aria-label="Profile saved on this device"
+                className="shrink-0 text-neon-cyan/80"
+                size={16}
+              />
+            </div>
+            {storageError && (
+              <p
+                aria-live="polite"
+                className="mx-2.5 mb-2 rounded-md border border-red-300/15 bg-red-400/[0.06] px-2.5 py-2 text-[10px] leading-4 text-red-100/80"
+                role="alert"
               >
-                <motion.div
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96, y: 6 }}
-                  initial={{ opacity: 0, scale: 0.96, y: 6 }}
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : 0.18,
-                    ease: "easeOut",
-                  }}
-                >
-                  <div className="flex items-center gap-3 p-3">
-                    <Avatar className="size-12 border-neon-cyan/35" size="lg">
-                      <AvatarImage
-                        alt={profile.username}
-                        src={getAvatar(profile.avatar, avatars).image}
-                      />
-                      <AvatarFallback>
-                        {profile.username.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <p className="truncate text-sm font-bold text-white">
-                          {profile.username}
-                        </p>
-                        <Image
-                          alt={`${profileConsole.label} logo`}
-                          className="size-6 shrink-0 object-contain"
-                          height={24}
-                          src={profileConsole.image}
-                          width={24}
-                        />
-                      </div>
-                    </div>
-                    <ShieldCheck
-                      aria-label="Profile saved on this device"
-                      className="shrink-0 text-neon-cyan/80"
-                      size={17}
-                    />
-                  </div>
-                  {storageError && (
-                    <p
-                      aria-live="polite"
-                      className="mx-3 mb-2 rounded-md border border-red-300/15 bg-red-400/[0.06] px-2.5 py-2 text-[10px] leading-4 text-red-100/80"
-                      role="alert"
-                    >
-                      {storageError}
-                    </p>
-                  )}
-                  <div className="border-t border-white/10 p-1.5">
-                    <Button
-                      className="w-full justify-start text-[10px] tracking-[0.12em]"
-                      onClick={startEditing}
-                      disabled={isDeleting}
-                      size="sm"
-                      variant="ghost"
-                    >
-                      <Pencil aria-hidden="true" size={14} />
-                      EDIT PLAYER PROFILE
-                    </Button>
-                    <Button
-                      aria-busy={isDeleting}
-                      className={`w-full justify-start text-[10px] tracking-[0.12em] text-red-200/80 transition-[color,background-color,box-shadow] ${
-                        isDeleting
-                          ? "bg-red-400/[0.08] text-red-100 shadow-[0_0_18px_rgba(248,113,113,0.12)]"
-                          : "hover:border-red-300/20 hover:bg-red-400/[0.08] hover:text-red-100"
-                      }`}
-                      onClick={deleteProfile}
-                      disabled={isDeleting}
-                      size="sm"
-                      variant="ghost"
-                    >
-                      {isDeleting ? (
-                        <LoaderCircle
-                          aria-hidden="true"
-                          className="animate-spin"
-                          size={14}
-                        />
-                      ) : (
-                        <Trash2 aria-hidden="true" size={14} />
-                      )}
-                      {isDeleting ? "DELETING..." : "DELETE PROFILE"}
-                    </Button>
-                  </div>
-                </motion.div>
-              </PopoverContent>
+                {storageError}
+              </p>
             )}
-          </AnimatePresence>
-        </Popover>
+            <DropdownMenuSeparator className="my-1" />
+            <DropdownMenuItem
+              className="min-h-10 justify-between px-2.5 text-[10px] font-semibold tracking-[0.12em] text-white/80 data-[highlighted]:bg-white/[0.06] data-[highlighted]:text-white"
+              disabled={isDeleting}
+              onSelect={startEditing}
+            >
+              <span>EDIT PLAYER PROFILE</span>
+              <Pencil
+                aria-hidden="true"
+                className="text-white/55"
+                size={14}
+              />
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="my-1" />
+            <DropdownMenuItem
+              aria-busy={isDeleting}
+              className={`min-h-10 justify-between px-2.5 text-[10px] font-semibold tracking-[0.12em] text-red-200/75 data-[highlighted]:bg-red-400/[0.08] data-[highlighted]:text-red-100 ${
+                isDeleting ? "bg-red-400/[0.06] text-red-100" : ""
+              }`}
+              onSelect={(event) => {
+                event.preventDefault();
+                deleteProfile();
+              }}
+              disabled={isDeleting}
+            >
+              <span>{isDeleting ? "DELETING..." : "DELETE PROFILE"}</span>
+              {isDeleting ? (
+                <LoaderCircle
+                  aria-hidden="true"
+                  className="animate-spin text-red-300/80"
+                  size={14}
+                />
+              ) : (
+                <Trash2
+                  aria-hidden="true"
+                  className="text-red-300/70"
+                  size={14}
+                />
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
 
       <Dialog
