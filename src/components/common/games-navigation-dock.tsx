@@ -215,14 +215,26 @@ export function GamesNavigationDock() {
             }
             type="button"
           >
-            <Image
-              alt="PS5 controller"
-              className="relative z-10 h-10 w-10 rotate-12 object-contain transition-transform duration-150 ease-out sm:h-12 sm:w-12"
-              height={384}
-              src="/images/ps5.png"
-              unoptimized
-              width={624}
-            />
+            <motion.span
+              animate={
+                shouldReduceMotion ? undefined : { scale: [1, 1.08, 1] }
+              }
+              className="relative z-10 flex size-10 items-center justify-center sm:size-12"
+              transition={{
+                repeat: Infinity,
+                duration: 3,
+                ease: "easeInOut",
+              }}
+            >
+              <Image
+                alt="PS5 controller"
+                className="h-full w-full rotate-12 object-contain"
+                height={384}
+                src="/images/ps5.png"
+                unoptimized
+                width={624}
+              />
+            </motion.span>
           </button>
         </motion.div>
 
