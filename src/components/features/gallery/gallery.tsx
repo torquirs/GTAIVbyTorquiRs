@@ -115,7 +115,7 @@ export function Gallery() {
         )}
         <Image
           key={activeSlide.image}
-          alt={activeSlide.name}
+          alt={`GTA 6 scene featuring ${activeSlide.name}`}
           className={`absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${
             previousIndex === null || isImageVisible
               ? "opacity-100"

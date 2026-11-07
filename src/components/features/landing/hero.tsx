@@ -23,7 +23,7 @@ export function Hero() {
           </p>
           <h1 className="mx-auto w-full max-w-[460px]" id="hero-title">
             <Image
-              alt="Grand Theft Auto VI logo"
+              alt="Grand Theft Auto VI (GTA 6) logo for the TorquiRS countdown"
               className="h-auto w-full mix-blend-screen"
               height={225}
               priority

@@ -7,18 +7,37 @@ import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = homeMetadata;
 
+const siteUrl = siteConfig.url.toString();
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "WebPage",
-  name: siteConfig.title,
-  description: siteConfig.description,
-  url: new URL("/", siteConfig.url).toString(),
-  inLanguage: siteConfig.language,
-  isPartOf: {
-    "@type": "WebSite",
-    name: siteConfig.name,
-    url: siteConfig.url.toString(),
-  },
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}#organization`,
+      name: siteConfig.name,
+      url: siteUrl,
+      logo: new URL("/images/torquirs-logo.png", siteConfig.url).toString(),
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      name: siteConfig.name,
+      url: siteUrl,
+      description: siteConfig.description,
+      inLanguage: siteConfig.language,
+      publisher: { "@id": `${siteUrl}#organization` },
+    },
+    {
+      "@type": "WebPage",
+      "@id": siteUrl,
+      name: siteConfig.title,
+      description: siteConfig.description,
+      url: siteUrl,
+      inLanguage: siteConfig.language,
+      isPartOf: { "@id": `${siteUrl}#website` },
+      publisher: { "@id": `${siteUrl}#organization` },
+    },
+  ],
 };
 
 /**

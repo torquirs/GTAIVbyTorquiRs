@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { BackgroundMusic } from "@/components/common/background-music";
 import { ParticlesBackground } from "@/components/common/particles-background";
 import { IntroLoader } from "@/components/features/intro/intro-loader";
@@ -8,6 +9,11 @@ import { siteConfig } from "@/config/site";
 import "./globals.css";
 
 export const metadata: Metadata = siteMetadata;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 /**
  * Root document layout shared by every App Router page.
@@ -22,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </div>
         <BackgroundMusic />
         <IntroLoader />
+        <Analytics />
       </body>
     </html>
   );

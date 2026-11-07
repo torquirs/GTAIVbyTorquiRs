@@ -23,10 +23,10 @@ function parseSiteUrl(value: string): URL {
 }
 
 export const siteConfig = {
-  name: "GTA VI Release Countdown",
-  title: "Grand Theft Auto VI — Release Countdown",
+  name: "GTA 6 Torquirs",
+  title: "GTA 6 Torquirs | Grand Theft Auto VI Release Countdown",
   description:
-    "An independent, fan-made countdown to Grand Theft Auto VI. The wait is almost over.",
+    "Follow the GTA 6 Torquirs countdown to Grand Theft Auto VI's November 19, 2026 release. Explore Vice City and Leonida imagery in this independent, fan-made project.",
   url: parseSiteUrl(configuredUrl),
   locale: "en_US",
   language: "en",
@@ -34,6 +34,8 @@ export const siteConfig = {
   releaseLabel: "November 19, 2026",
   socialImage: "/images/Jason_and_Lucia_01.jpg",
   keywords: [
+    "GTA 6 Torquirs",
+    "TorquiRS GTA 6 countdown",
     "Grand Theft Auto VI",
     "GTA 6 countdown",
     "GTA VI release date",
