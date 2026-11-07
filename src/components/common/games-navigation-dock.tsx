@@ -140,6 +140,7 @@ export function GamesNavigationDock() {
     >
       <div className="relative flex items-end gap-4 sm:gap-5">
         <motion.div
+          tabIndex={-1}
           whileHover={hoverAnimation}
           whileTap={tapAnimation}
           transition={{ duration: 0.18, ease: "easeOut" }}
@@ -177,6 +178,7 @@ export function GamesNavigationDock() {
           className="relative -translate-y-3 flex size-16 shrink-0 items-center justify-center sm:size-[4.5rem]"
           onMouseEnter={() => setHoveredItem("games")}
           onMouseLeave={() => setHoveredItem(null)}
+          tabIndex={-1}
           whileHover={hoverAnimation}
           whileTap={tapAnimation}
           transition={{ duration: 0.18, ease: "easeOut" }}
@@ -240,6 +242,7 @@ export function GamesNavigationDock() {
           className="relative"
           onMouseEnter={() => setHoveredItem("controller")}
           onMouseLeave={() => setHoveredItem(null)}
+          tabIndex={-1}
           whileHover={hoverAnimation}
           whileTap={tapAnimation}
           transition={{ duration: 0.18, ease: "easeOut" }}

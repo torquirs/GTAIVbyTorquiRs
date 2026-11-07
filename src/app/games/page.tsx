@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GamesNavigationDock } from "@/components/common/games-navigation-dock";
+import { GamesPlayerProfile } from "@/components/features/games/games-player-profile";
 import { GamesStartupAudio } from "@/components/features/games/games-startup-audio";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function GamesPage() {
       className="relative isolate flex min-h-svh flex-1 overflow-hidden"
     >
       <GamesStartupAudio />
+      <GamesPlayerProfile />
       <GamesNavigationDock />
     </main>
   );
