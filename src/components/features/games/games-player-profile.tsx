@@ -39,14 +39,78 @@ const PROFILE_INITIALIZATION_DELAY_MS = 1750;
 const PROFILE_DELETION_DELAY_MS = 1500;
 const PROFILE_CARD_SURFACE_CLASS =
   "border border-white/10 bg-black/60 backdrop-blur-md";
+const DEFAULT_AVATAR_ID = "lucia";
 
-const avatars = [
-  { id: "lucia", name: "Lucia", image: "/images/Jason_and_Lucia_01.jpg" },
-  { id: "jason", name: "Jason", image: "/images/Jason_Duval_01.jpg" },
-  { id: "brian", name: "Brian", image: "/images/Brian_Heder_01.jpg" },
-  { id: "vice-city", name: "Vice City", image: "/images/Jason_and_Lucia_04.jpg" },
-  { id: "leonida", name: "Leonida", image: "/images/Jason_Duval_07.jpg" },
+const AVATAR_METADATA: Readonly<
+  Record<string, { readonly id: string; readonly name: string }>
+> = {
+  "nova.svg": { id: "lucia", name: "Nova" },
+  "jax.svg": { id: "jason", name: "Jax" },
+  "vex.svg": { id: "brian", name: "Vex" },
+  "apex.svg": { id: "vice-city", name: "Apex" },
+  "kael.svg": { id: "leonida", name: "Kael" },
+  "orion.svg": { id: "orion", name: "Orion" },
+  "zen.svg": { id: "zen", name: "Zen" },
+  "ronin.svg": { id: "ronin", name: "Ronin" },
+  "echo.svg": { id: "echo", name: "Echo" },
+  "riven.svg": { id: "riven", name: "Riven" },
+  "nyx.svg": { id: "nyx", name: "Nyx" },
+  "onyx.svg": { id: "onyx", name: "Onyx" },
+  "kairo.svg": { id: "kairo", name: "Kairo" },
+  "astra.svg": { id: "astra", name: "Astra" },
+  "drift.svg": { id: "drift", name: "Drift" },
+};
+
+const CURATED_AVATAR_NAMES = [
+  "Apex",
+  "Vex",
+  "Jax",
+  "Kael",
+  "Orion",
+  "Zen",
+  "Ronin",
+  "Echo",
+  "Riven",
+  "Nyx",
+  "Onyx",
+  "Kairo",
+  "Astra",
+  "Drift",
+  "Nova",
 ] as const;
+
+interface AvatarOption {
+  readonly id: string;
+  readonly name: string;
+  readonly image: string;
+}
+
+const DEFAULT_AVATAR: AvatarOption = {
+  id: DEFAULT_AVATAR_ID,
+  name: "Nova",
+  image: "/images/operator-portraits/nova.svg",
+};
+
+function createAvatarOptions(files: readonly string[]): AvatarOption[] {
+  return files.map((filename) => {
+    const metadata = AVATAR_METADATA[filename.toLowerCase()];
+    const stem = filename.replace(/\.[^.]+$/, "");
+    const filenameHash = Array.from(filename.toLowerCase()).reduce(
+      (hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0,
+      0,
+    );
+
+    return {
+      id:
+        metadata?.id ??
+        stem.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+      name:
+        metadata?.name ??
+        CURATED_AVATAR_NAMES[filenameHash % CURATED_AVATAR_NAMES.length],
+      image: `/images/operator-portraits/${encodeURIComponent(filename)}`,
+    };
+  });
+}
 
 const consoles = [
   {
@@ -71,7 +135,7 @@ const consoles = [
 }[];
 
 type ConsoleId = (typeof consoles)[number]["id"];
-type AvatarId = (typeof avatars)[number]["id"];
+type AvatarId = string;
 
 interface PlayerProfile {
   readonly username: string;
@@ -90,13 +154,21 @@ function isPlayerProfile(value: unknown): value is PlayerProfile {
     typeof profile.username === "string" &&
     profile.username.trim().length >= 2 &&
     profile.username.trim().length <= USERNAME_MAX_LENGTH &&
-    consoles.some((consoleOption) => consoleOption.id === profile.console) &&
-    avatars.some((avatarOption) => avatarOption.id === profile.avatar)
+    typeof profile.avatar === "string" &&
+    profile.avatar.length > 0 &&
+    consoles.some((consoleOption) => consoleOption.id === profile.console)
   );
 }
 
-function getAvatar(avatarId: AvatarId) {
-  return avatars.find((avatar) => avatar.id === avatarId) ?? avatars[0];
+function getAvatar(
+  avatarId: AvatarId,
+  avatars: readonly AvatarOption[],
+): AvatarOption {
+  return (
+    avatars.find((avatarOption) => avatarOption.id === avatarId) ??
+    avatars[0] ??
+    DEFAULT_AVATAR
+  );
 }
 
 function getConsole(consoleId: ConsoleId) {
@@ -118,11 +190,14 @@ export function GamesPlayerProfile({
 }) {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [avatars, setAvatars] = useState<AvatarOption[]>([]);
+  const [isLoadingAvatars, setIsLoadingAvatars] = useState(true);
+  const [avatarLoadError, setAvatarLoadError] = useState("");
   const [hasStartedWelcome, setHasStartedWelcome] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState("");
   const [consoleId, setConsoleId] = useState<ConsoleId>("pc");
-  const [avatarId, setAvatarId] = useState<AvatarId>(avatars[0].id);
+  const [avatarId, setAvatarId] = useState<AvatarId>(DEFAULT_AVATAR_ID);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [profilePopoverOpen, setProfilePopoverOpen] = useState(false);
   const [formError, setFormError] = useState("");
@@ -132,9 +207,73 @@ export function GamesPlayerProfile({
   const saveTimerRef = useRef<number | null>(null);
   const deleteTimerRef = useRef<number | null>(null);
   const shouldReduceMotion = useReducedMotion();
-  const avatar = getAvatar(avatarId);
+  const selectedAvatarId =
+    avatars.length > 0 && !avatars.some((option) => option.id === avatarId)
+      ? avatars[0].id
+      : avatarId;
+  const avatar = getAvatar(selectedAvatarId, avatars);
   const selectedConsole = getConsole(consoleId);
   const profileConsole = profile ? getConsole(profile.console) : selectedConsole;
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadAvatars = async () => {
+      try {
+        const response = await fetch("/api/operator-portraits", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Portrait request failed with status ${response.status}`);
+        }
+
+        const result: unknown = await response.json();
+
+        if (
+          !result ||
+          typeof result !== "object" ||
+          !("files" in result) ||
+          !Array.isArray(result.files) ||
+          !result.files.every((filename) => typeof filename === "string")
+        ) {
+          throw new Error("Portrait response has an invalid format");
+        }
+
+        const loadedAvatars = createAvatarOptions(result.files);
+
+        if (loadedAvatars.length === 0) {
+          throw new Error("No operator portraits were found");
+        }
+
+        if (isActive) {
+          setAvatars(loadedAvatars);
+          setAvatarId((currentAvatarId) =>
+            loadedAvatars.some((option) => option.id === currentAvatarId)
+              ? currentAvatarId
+              : loadedAvatars[0].id,
+          );
+          setAvatarLoadError("");
+        }
+      } catch {
+        if (isActive) {
+          setAvatarLoadError(
+            "Operator portraits could not be loaded. Refresh the page to try again.",
+          );
+        }
+      } finally {
+        if (isActive) {
+          setIsLoadingAvatars(false);
+        }
+      }
+    };
+
+    void loadAvatars();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let storedProfile: PlayerProfile | null = null;
@@ -191,6 +330,13 @@ export function GamesPlayerProfile({
       return;
     }
 
+    if (isLoadingAvatars || avatars.length === 0) {
+      setFormError(
+        avatarLoadError || "Wait for the operator portraits to finish loading.",
+      );
+      return;
+    }
+
     const normalizedUsername = username.trim();
 
     if (normalizedUsername.length < 2) {
@@ -206,7 +352,7 @@ export function GamesPlayerProfile({
     const nextProfile: PlayerProfile = {
       username: normalizedUsername,
       console: consoleId,
-      avatar: avatarId,
+      avatar: selectedAvatarId,
     };
 
     setFormError("");
@@ -267,7 +413,7 @@ export function GamesPlayerProfile({
       setAvatarPickerOpen(false);
       setUsername("");
       setConsoleId("pc");
-      setAvatarId(avatars[0].id);
+      setAvatarId(DEFAULT_AVATAR_ID);
       setFormError("");
       setStorageError("");
       setProfile(null);
@@ -412,7 +558,7 @@ export function GamesPlayerProfile({
               <Avatar className="size-11 border-neon-cyan/35" size="default">
                 <AvatarImage
                   alt={profile.username}
-                  src={getAvatar(profile.avatar).image}
+                  src={getAvatar(profile.avatar, avatars).image}
                 />
                 <AvatarFallback>
                   {profile.username.slice(0, 2).toUpperCase()}
@@ -441,7 +587,7 @@ export function GamesPlayerProfile({
                     <Avatar className="size-12 border-neon-cyan/35" size="lg">
                       <AvatarImage
                         alt={profile.username}
-                        src={getAvatar(profile.avatar).image}
+                        src={getAvatar(profile.avatar, avatars).image}
                       />
                       <AvatarFallback>
                         {profile.username.slice(0, 2).toUpperCase()}
@@ -647,20 +793,30 @@ export function GamesPlayerProfile({
                 </PopoverTrigger>
                 <PopoverContent
                   align="start"
-                  className="w-[min(21rem,calc(100vw-3rem))] border-white/15 bg-[#10131b]/98 p-3"
+                  className={`w-[min(23rem,calc(100vw-2rem))] ${PROFILE_CARD_SURFACE_CLASS} p-3`}
                   sideOffset={8}
                 >
                   <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50">
                     Select player avatar
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
+                  {isLoadingAvatars && (
+                    <p className="mb-2 text-xs text-white/50" role="status">
+                      Loading operator portraits...
+                    </p>
+                  )}
+                  {avatarLoadError && (
+                    <p className="mb-2 text-xs text-red-100/80" role="alert">
+                      {avatarLoadError}
+                    </p>
+                  )}
+                  <div className="avatar-picker-scrollbar grid max-h-[180px] grid-cols-3 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-5">
                     {avatars.map((option) => (
                       <Button
                         aria-label={`Choose ${option.name} avatar`}
-                        aria-pressed={avatarId === option.id}
-                        className={`h-auto flex-col gap-1.5 rounded-lg border p-2 ${
-                          avatarId === option.id
-                            ? "border-neon-cyan/55 bg-neon-cyan/10 text-white"
+                        aria-pressed={selectedAvatarId === option.id}
+                        className={`h-auto flex-col gap-1 rounded-lg border p-1.5 transition-[border-color,background-color,box-shadow,transform] duration-200 ${
+                          selectedAvatarId === option.id
+                            ? "scale-[1.03] border-neon-cyan/55 bg-neon-cyan/10 text-white shadow-[0_0_16px_rgba(149,233,223,0.12)]"
                             : "border-white/10 bg-white/[0.02] text-white/60 hover:border-white/25 hover:bg-white/[0.06]"
                         }`}
                         key={option.id}
@@ -677,7 +833,9 @@ export function GamesPlayerProfile({
                             {option.name.slice(0, 1)}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-[9px]">{option.name}</span>
+                        <span className="max-w-full truncate whitespace-nowrap text-center text-[9px] leading-none">
+                          {option.name}
+                        </span>
                       </Button>
                     ))}
                   </div>

@@ -124,6 +124,24 @@ body {
   color: var(--site-ink);
 }
 
+.avatar-picker-scrollbar {
+  scrollbar-color: rgb(255 255 255 / 20%) transparent;
+  scrollbar-width: thin;
+}
+
+.avatar-picker-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.avatar-picker-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.avatar-picker-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 20%);
+}
+
 .display-type {
   font-family: var(--font-display);
   font-stretch: condensed;
