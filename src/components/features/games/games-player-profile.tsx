@@ -341,9 +341,6 @@ export function GamesPlayerProfile() {
           showCloseButton={Boolean(profile) && !isSaving}
         >
           <DialogHeader className="gap-1 pr-8">
-            <p className="tracking-label text-[8px] font-semibold uppercase text-neon-cyan/75">
-              Player identity · Leonida network
-            </p>
             <DialogTitle className="display-type text-2xl tracking-wide text-white sm:text-3xl">
               {isEditing ? "Edit player profile" : "Initialize player"}
             </DialogTitle>
@@ -515,7 +512,7 @@ export function GamesPlayerProfile() {
                 {isSaving
                   ? "INITIALIZING..."
                   : profile
-                    ? "SAVE PLAYER PROFILE"
+                    ? "ENTER ARENA"
                     : "INITIALIZE PROFILE"}
               </span>
             </Button>
