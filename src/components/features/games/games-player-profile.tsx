@@ -334,15 +334,45 @@ export function GamesPlayerProfile({
                 ease: [0.22, 1, 0.36, 1],
               }}
             >
-              <h1 className="display-type text-[clamp(3.35rem,11.4vw,8.6rem)] leading-[0.82] tracking-[0.015em] text-white [text-shadow:0_8px_50px_rgba(0,0,0,0.65)]">
-                TORQUI
-                <span className="text-cyan-200 drop-shadow-[0_0_24px_rgba(103,232,249,0.38)]">
-                  RS
+              <motion.div
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-7 grid size-24 place-items-center sm:mb-8 sm:size-28"
+                initial={{ opacity: 0, y: 8 }}
+                transition={{
+                  delay: shouldReduceMotion ? 0 : 0.16,
+                  duration: shouldReduceMotion ? 0 : 0.5,
+                  ease: "easeInOut",
+                }}
+              >
+                <motion.div
+                  animate={shouldReduceMotion ? { y: 0 } : { y: [-6, 6, -6] }}
+                  className="size-full"
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 3,
+                    ease: "easeInOut",
+                    repeat: shouldReduceMotion ? 0 : Infinity,
+                  }}
+                >
+                  <Image
+                    alt="TorquiRS"
+                    className="h-full w-full object-contain drop-shadow-[0_0_14px_rgba(103,232,249,0.28)]"
+                    height={368}
+                    priority
+                    src="/images/torquirs-logo-header.png"
+                    unoptimized
+                    width={438}
+                  />
+                </motion.div>
+              </motion.div>
+              <h1 className="display-type max-w-5xl text-[clamp(2.5rem,7.4vw,6.6rem)] leading-[0.9] tracking-[0.015em] text-white [text-shadow:0_8px_50px_rgba(0,0,0,0.65)]">
+                WHERE TACTICAL PRECISION
+                <span className="mt-2 block text-cyan-200 drop-shadow-[0_0_24px_rgba(103,232,249,0.38)] sm:mt-3">
+                  MEETS CINEMATIC LEGENDS
                 </span>
               </h1>
-              <p className="mt-5 max-w-lg text-xs leading-6 text-white/55 sm:mt-6 sm:text-sm sm:leading-7">
-                A next-generation gaming hub for cinematic worlds, competitive
-                arenas, and unforgettable play.
+              <p className="mt-5 max-w-2xl text-xs leading-6 text-white/55 sm:mt-6 sm:text-sm sm:leading-7">
+                Dive into epic story-driven worlds, master precision tactical
+                action, and power your journey with peak performance.
               </p>
               <Button
                 className="group relative mt-7 min-h-12 min-w-56 overflow-hidden px-7 text-[10px] tracking-[0.2em] sm:mt-8"
@@ -351,7 +381,7 @@ export function GamesPlayerProfile({
                 variant="default"
               >
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                <span className="relative">INITIALIZE SYSTEM</span>
+                <span className="relative">ENTER THE VAULT</span>
                 <ArrowRight
                   aria-hidden="true"
                   className="relative transition-transform duration-200 group-hover:translate-x-1"
