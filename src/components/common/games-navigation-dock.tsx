@@ -9,6 +9,18 @@ import { usePathname } from "next/navigation";
 
 type HoverSound = "home" | "home-select" | "brand" | "settings";
 
+const HOVER_TONES = {
+  home: { start: 520, end: 760, duration: 0.075, type: "sine" },
+  "home-select": {
+    start: 740,
+    end: 520,
+    duration: 0.09,
+    type: "triangle",
+  },
+  brand: { start: 880, end: 1320, duration: 0.12, type: "sine" },
+  settings: { start: 420, end: 320, duration: 0.055, type: "triangle" },
+} as const;
+
 interface AudioContextWindow extends Window {
   webkitAudioContext?: typeof AudioContext;
 }
@@ -41,34 +53,37 @@ async function playHoverSound(
       return;
     }
 
-    const tones = {
-      home: { start: 520, end: 760, duration: 0.075, type: "sine" },
-      "home-select": {
-        start: 740,
-        end: 520,
-        duration: 0.09,
-        type: "triangle",
-      },
-      brand: { start: 880, end: 1320, duration: 0.12, type: "sine" },
-      settings: { start: 420, end: 320, duration: 0.055, type: "triangle" },
-    } as const;
-    const tone = tones[sound];
+    const tone = HOVER_TONES[sound];
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     const now = context.currentTime;
 
     oscillator.type = tone.type;
     oscillator.frequency.setValueAtTime(tone.start, now);
-    oscillator.frequency.exponentialRampToValueAtTime(tone.end, now + tone.duration);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      tone.end,
+      now + tone.duration,
+    );
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(0.07, now + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + tone.duration);
     oscillator.connect(gain);
     gain.connect(context.destination);
+    oscillator.addEventListener(
+      "ended",
+      () => {
+        oscillator.disconnect();
+        gain.disconnect();
+      },
+      { once: true },
+    );
     oscillator.start(now);
     oscillator.stop(now + tone.duration);
   } catch (error) {
-    if (error instanceof DOMException && error.name === "NotAllowedError") {
+    if (
+      error instanceof DOMException &&
+      ["InvalidStateError", "NotAllowedError"].includes(error.name)
+    ) {
       return;
     }
 
@@ -88,11 +103,9 @@ export function GamesNavigationDock() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const pathname = usePathname();
   const isHomeActive = pathname === "/";
-  const selectedItem = settingsOpen
-    ? "controller"
-    : pathname === "/games"
-      ? "games"
-      : "home";
+  const [selectedItem, setSelectedItem] = useState<"games" | "controller">(
+    () => (pathname === "/games" ? "controller" : "games"),
+  );
   const focusedItem = hoveredItem ?? selectedItem;
   const isGamesFocused = focusedItem === "games";
   const isControllerFocused = focusedItem === "controller";
@@ -108,7 +121,13 @@ export function GamesNavigationDock() {
       audioContextRef.current = null;
 
       if (context && context.state !== "closed") {
-        void context.close();
+        void context.close().catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "InvalidStateError") {
+            return;
+          }
+
+          console.error("Could not close the navigation audio context.", error);
+        });
       }
     },
     [],
@@ -168,10 +187,10 @@ export function GamesNavigationDock() {
               !isGamesFocused
                 ? { opacity: 0, scale: 0.95 }
                 : shouldReduceMotion
-                  ? { opacity: 0.24, scale: 1 }
-                  : { opacity: [0.16, 0.28, 0.16], scale: [0.98, 1.04, 0.98] }
+                  ? { opacity: 0.22, scale: 1 }
+                  : { opacity: [0.14, 0.24, 0.14], scale: [0.98, 1.04, 0.98] }
             }
-            className="pointer-events-none absolute -inset-4 rounded-full bg-cyan-400/15 blur-xl shadow-[0_0_24px_rgba(34,211,238,0.2)]"
+            className="pointer-events-none absolute -inset-4 rounded-full bg-[rgba(255,85,0,0.15)] blur-xl shadow-[0_0_24px_rgba(255,85,0,0.2)]"
             transition={{
               duration: shouldReduceMotion ? 0 : 2.4,
               ease: "easeInOut",
@@ -182,10 +201,15 @@ export function GamesNavigationDock() {
             aria-current={pathname === "/games" ? "page" : undefined}
             aria-label="Games"
             aria-pressed={isGamesFocused}
-            className={`relative grid size-16 cursor-pointer place-items-center rounded-full border bg-[#10141e]/85 shadow-[0_8px_34px_rgba(0,0,0,0.45)] outline-none backdrop-blur-md transition-[border-color,background-color,filter,transform] duration-150 ease-out focus-visible:drop-shadow-[0_0_10px_rgba(103,232,249,0.8)] sm:size-[4.5rem] ${
-              isGamesFocused ? "scale-105" : "scale-100"
+            className={`relative grid size-16 cursor-pointer place-items-center rounded-full border bg-[#10141e]/85 shadow-[0_8px_34px_rgba(0,0,0,0.45)] outline-none backdrop-blur-md transition-[border-color,background-color,filter,transform] duration-150 ease-out focus-visible:drop-shadow-[0_0_10px_rgba(253,186,116,0.8)] sm:size-[4.5rem] ${
+              isGamesFocused
+                ? "scale-105 border-orange-200/35"
+                : "scale-100 border-white/15"
             }`}
-            onClick={() => setSettingsOpen(false)}
+            onClick={() => {
+              setSelectedItem("games");
+              setSettingsOpen(false);
+            }}
             onMouseEnter={() => void playHoverSound(audioContextRef, "brand")}
             type="button"
           >
@@ -226,8 +250,8 @@ export function GamesNavigationDock() {
               !isControllerFocused
                 ? { opacity: 0, scale: 0.95 }
                 : shouldReduceMotion
-                  ? { opacity: 0.24, scale: 1 }
-                  : { opacity: [0.16, 0.28, 0.16], scale: [0.98, 1.04, 0.98] }
+                  ? { opacity: 0.22, scale: 1 }
+                  : { opacity: [0.14, 0.24, 0.14], scale: [0.98, 1.04, 0.98] }
             }
             className="pointer-events-none absolute -inset-4 rounded-full bg-cyan-400/15 blur-xl shadow-[0_0_24px_rgba(34,211,238,0.2)]"
             transition={{
@@ -238,13 +262,16 @@ export function GamesNavigationDock() {
           />
           <button
             aria-label="PlayStation controller, settings coming soon"
-            aria-pressed={settingsOpen}
+            aria-pressed={isControllerFocused}
             className={`relative grid size-14 cursor-pointer place-items-center rounded-full border bg-[#11131b]/75 shadow-[0_8px_30px_rgba(0,0,0,0.38)] outline-none backdrop-blur-md transition-[color,border-color,background-color,filter,transform] duration-150 ease-out focus-visible:drop-shadow-[0_0_8px_rgba(255,255,255,0.7)] sm:size-16 ${
               isControllerFocused
                 ? "scale-105 border-cyan-200/35 text-cyan-100 drop-shadow-[0_0_8px_rgba(103,232,249,0.35)]"
                 : "border-white/15 text-white/65 hover:border-white/30 hover:bg-[#181b25]/85 hover:text-white"
             }`}
-            onClick={() => setSettingsOpen((isOpen) => !isOpen)}
+            onClick={() => {
+              setSelectedItem("controller");
+              setSettingsOpen((isOpen) => !isOpen);
+            }}
             onMouseEnter={() =>
               void playHoverSound(audioContextRef, "settings")
             }

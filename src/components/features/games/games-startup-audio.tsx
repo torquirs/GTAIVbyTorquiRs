@@ -28,5 +28,5 @@ export function GamesStartupAudio() {
     };
   }, []);
 
-  return <audio preload="auto" ref={audioRef} src={STARTUP_SOUND} />;
+  return <audio loop={false} preload="auto" ref={audioRef} src={STARTUP_SOUND} />;
 }

@@ -22,7 +22,6 @@ export function BackgroundMusic() {
       return;
     }
     audioRef.current?.pause();
-    audioRef.current?.pause();
   }, [pathname]);
 
   const togglePlayback = async () => {
