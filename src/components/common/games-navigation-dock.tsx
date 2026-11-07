@@ -136,7 +136,7 @@ export function GamesNavigationDock() {
   return (
     <nav
       aria-label="Games navigation"
-      className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] z-50 mx-auto w-fit px-4"
+      className="pointer-events-auto fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] z-50 mx-auto w-fit px-4"
     >
       <div className="relative flex items-end gap-4 sm:gap-5">
         <motion.div
