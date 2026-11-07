@@ -81,11 +81,21 @@ async function playHoverSound(
  */
 export function GamesNavigationDock() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<
+    "home" | "games" | "controller" | null
+  >(null);
   const shouldReduceMotion = useReducedMotion();
   const audioContextRef = useRef<AudioContext | null>(null);
   const pathname = usePathname();
   const isHomeActive = pathname === "/";
-  const isGamesActive = pathname === "/games" && !settingsOpen;
+  const selectedItem = settingsOpen
+    ? "controller"
+    : pathname === "/games"
+      ? "games"
+      : "home";
+  const focusedItem = hoveredItem ?? selectedItem;
+  const isGamesFocused = focusedItem === "games";
+  const isControllerFocused = focusedItem === "controller";
 
   const tapAnimation = shouldReduceMotion ? undefined : { scale: 0.96 };
   const hoverAnimation = shouldReduceMotion
@@ -129,7 +139,11 @@ export function GamesNavigationDock() {
                 void playHoverSound(audioContextRef, "home-select");
               }
             }}
-            onMouseEnter={() => void playHoverSound(audioContextRef, "home")}
+            onMouseEnter={() => {
+              setHoveredItem("home");
+              void playHoverSound(audioContextRef, "home");
+            }}
+            onMouseLeave={() => setHoveredItem(null)}
           >
             <House
               aria-hidden="true"
@@ -142,37 +156,39 @@ export function GamesNavigationDock() {
 
         <motion.div
           className="relative -translate-y-3 flex size-16 shrink-0 items-center justify-center sm:size-[4.5rem]"
+          onMouseEnter={() => setHoveredItem("games")}
+          onMouseLeave={() => setHoveredItem(null)}
           whileHover={hoverAnimation}
           whileTap={tapAnimation}
           transition={{ duration: 0.18, ease: "easeOut" }}
         >
+          <motion.span
+            aria-hidden="true"
+            animate={
+              !isGamesFocused
+                ? { opacity: 0, scale: 0.95 }
+                : shouldReduceMotion
+                  ? { opacity: 0.24, scale: 1 }
+                  : { opacity: [0.16, 0.28, 0.16], scale: [0.98, 1.04, 0.98] }
+            }
+            className="pointer-events-none absolute -inset-4 rounded-full bg-cyan-400/15 blur-xl shadow-[0_0_24px_rgba(34,211,238,0.2)]"
+            transition={{
+              duration: shouldReduceMotion ? 0 : 2.4,
+              ease: "easeInOut",
+              repeat: isGamesFocused && !shouldReduceMotion ? Infinity : 0,
+            }}
+          />
           <button
             aria-current={pathname === "/games" ? "page" : undefined}
             aria-label="Games"
-            aria-pressed={isGamesActive}
+            aria-pressed={isGamesFocused}
             className={`relative grid size-16 cursor-pointer place-items-center rounded-full border bg-[#10141e]/85 shadow-[0_8px_34px_rgba(0,0,0,0.45)] outline-none backdrop-blur-md transition-[border-color,background-color,filter,transform] duration-150 ease-out focus-visible:drop-shadow-[0_0_10px_rgba(103,232,249,0.8)] sm:size-[4.5rem] ${
-              isGamesActive ? "scale-105" : "scale-100"
+              isGamesFocused ? "scale-105" : "scale-100"
             }`}
             onClick={() => setSettingsOpen(false)}
             onMouseEnter={() => void playHoverSound(audioContextRef, "brand")}
             type="button"
           >
-            {isGamesActive && (
-              <motion.span
-                aria-hidden="true"
-                animate={
-                  shouldReduceMotion
-                    ? { opacity: 0.75 }
-                    : { opacity: [0.55, 0.9, 0.55] }
-                }
-                className="pointer-events-none absolute inset-2 rounded-full bg-cyan-300/[0.08] shadow-[0_0_24px_rgba(34,211,238,0.24)]"
-                transition={{
-                  duration: 3,
-                  ease: "easeInOut",
-                  repeat: shouldReduceMotion ? 0 : Infinity,
-                }}
-              />
-            )}
             <motion.span
               animate={
                 shouldReduceMotion ? undefined : { scale: [1, 1.08, 1] }
@@ -197,16 +213,35 @@ export function GamesNavigationDock() {
         </motion.div>
 
         <motion.div
+          className="relative"
+          onMouseEnter={() => setHoveredItem("controller")}
+          onMouseLeave={() => setHoveredItem(null)}
           whileHover={hoverAnimation}
           whileTap={tapAnimation}
           transition={{ duration: 0.18, ease: "easeOut" }}
         >
+          <motion.span
+            aria-hidden="true"
+            animate={
+              !isControllerFocused
+                ? { opacity: 0, scale: 0.95 }
+                : shouldReduceMotion
+                  ? { opacity: 0.24, scale: 1 }
+                  : { opacity: [0.16, 0.28, 0.16], scale: [0.98, 1.04, 0.98] }
+            }
+            className="pointer-events-none absolute -inset-4 rounded-full bg-cyan-400/15 blur-xl shadow-[0_0_24px_rgba(34,211,238,0.2)]"
+            transition={{
+              duration: shouldReduceMotion ? 0 : 2.4,
+              ease: "easeInOut",
+              repeat: isControllerFocused && !shouldReduceMotion ? Infinity : 0,
+            }}
+          />
           <button
             aria-label="PlayStation controller, settings coming soon"
             aria-pressed={settingsOpen}
             className={`relative grid size-14 cursor-pointer place-items-center rounded-full border bg-[#11131b]/75 shadow-[0_8px_30px_rgba(0,0,0,0.38)] outline-none backdrop-blur-md transition-[color,border-color,background-color,filter,transform] duration-150 ease-out focus-visible:drop-shadow-[0_0_8px_rgba(255,255,255,0.7)] sm:size-16 ${
-              settingsOpen
-                ? "scale-105 border-fuchsia-200/35 text-fuchsia-100 drop-shadow-[0_0_8px_rgba(232,121,249,0.35)]"
+              isControllerFocused
+                ? "scale-105 border-cyan-200/35 text-cyan-100 drop-shadow-[0_0_8px_rgba(103,232,249,0.35)]"
                 : "border-white/15 text-white/65 hover:border-white/30 hover:bg-[#181b25]/85 hover:text-white"
             }`}
             onClick={() => setSettingsOpen((isOpen) => !isOpen)}
