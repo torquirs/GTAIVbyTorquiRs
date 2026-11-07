@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { GamesNavigationDock } from "@/components/common/games-navigation-dock";
-import { GamesPlayerProfile } from "@/components/features/games/games-player-profile";
-import { GamesStartupAudio } from "@/components/features/games/games-startup-audio";
+import { GamesExperience } from "@/components/features/games/games-experience";
 
 export const metadata: Metadata = {
   title: "Games | GTA 6 Torquirs",
@@ -18,9 +16,7 @@ export default function GamesPage() {
       aria-label="Games"
       className="relative isolate flex min-h-svh flex-1 overflow-hidden"
     >
-      <GamesStartupAudio />
-      <GamesPlayerProfile />
-      <GamesNavigationDock />
+      <GamesExperience />
     </main>
   );
 }

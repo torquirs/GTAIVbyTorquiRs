@@ -3,10 +3,12 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import {
+  ArrowRight,
   LoaderCircle,
   Pencil,
   ShieldCheck,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import {
   useEffect,
@@ -29,10 +31,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { GAMES_WELCOME_START_EVENT } from "@/components/features/games/games-startup-audio";
 
 const PROFILE_STORAGE_KEY = "gta6.games.player-profile.v1";
 const USERNAME_MAX_LENGTH = 20;
 const PROFILE_INITIALIZATION_DELAY_MS = 1750;
+const PROFILE_DELETION_DELAY_MS = 1500;
 const PROFILE_CARD_SURFACE_CLASS =
   "border border-white/10 bg-black/60 backdrop-blur-md";
 
@@ -105,9 +109,16 @@ function getConsole(consoleId: ConsoleId) {
 /**
  * First-visit player setup and the persistent Games-page player badge.
  */
-export function GamesPlayerProfile() {
+export function GamesPlayerProfile({
+  onProfileDeleted,
+  onProfileReady,
+}: {
+  onProfileDeleted: () => void;
+  onProfileReady: () => void;
+}) {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [hasStartedWelcome, setHasStartedWelcome] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState("");
   const [consoleId, setConsoleId] = useState<ConsoleId>("pc");
@@ -117,7 +128,9 @@ export function GamesPlayerProfile() {
   const [formError, setFormError] = useState("");
   const [storageError, setStorageError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const saveTimerRef = useRef<number | null>(null);
+  const deleteTimerRef = useRef<number | null>(null);
   const shouldReduceMotion = useReducedMotion();
   const avatar = getAvatar(avatarId);
   const selectedConsole = getConsole(consoleId);
@@ -156,6 +169,9 @@ export function GamesPlayerProfile() {
       }
       setStorageError(readError);
       setIsHydrated(true);
+      if (storedProfile) {
+        onProfileReady();
+      }
     });
 
     return () => {
@@ -163,8 +179,11 @@ export function GamesPlayerProfile() {
       if (saveTimerRef.current !== null) {
         window.clearTimeout(saveTimerRef.current);
       }
+      if (deleteTimerRef.current !== null) {
+        window.clearTimeout(deleteTimerRef.current);
+      }
     };
-  }, []);
+  }, [onProfileReady]);
 
   const saveProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -213,7 +232,48 @@ export function GamesPlayerProfile() {
       setUsername(normalizedUsername);
       setIsSaving(false);
       setIsEditing(false);
+      onProfileReady();
     }, PROFILE_INITIALIZATION_DELAY_MS);
+  };
+
+  const startExperience = () => {
+    setHasStartedWelcome(true);
+    window.dispatchEvent(new Event(GAMES_WELCOME_START_EVENT));
+  };
+
+  const deleteProfile = () => {
+    if (isDeleting) {
+      return;
+    }
+
+    setStorageError("");
+    setIsDeleting(true);
+    deleteTimerRef.current = window.setTimeout(() => {
+      deleteTimerRef.current = null;
+
+      try {
+        window.localStorage.removeItem(PROFILE_STORAGE_KEY);
+      } catch {
+        setStorageError(
+          "Could not delete your profile in this browser. Check local storage settings and try again.",
+        );
+        setIsDeleting(false);
+        return;
+      }
+
+      setIsDeleting(false);
+      setProfilePopoverOpen(false);
+      setIsEditing(false);
+      setAvatarPickerOpen(false);
+      setUsername("");
+      setConsoleId("pc");
+      setAvatarId(avatars[0].id);
+      setFormError("");
+      setStorageError("");
+      setProfile(null);
+      setHasStartedWelcome(false);
+      onProfileDeleted();
+    }, PROFILE_DELETION_DELAY_MS);
   };
 
   const startEditing = () => {
@@ -227,12 +287,91 @@ export function GamesPlayerProfile() {
     setIsEditing(true);
   };
 
-  const dialogOpen = isHydrated && (!profile || isEditing);
+  const dialogOpen =
+    isHydrated && (isEditing || (!profile && hasStartedWelcome));
 
   return (
     <>
+      <AnimatePresence>
+        {isHydrated && !profile && !hasStartedWelcome && (
+          <motion.section
+            aria-label="Games welcome"
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              filter: "blur(0px)",
+            }}
+            className="fixed inset-0 z-40 isolate flex min-h-svh items-center justify-center overflow-hidden bg-transparent px-5 py-12 text-center"
+            exit={{
+              opacity: 0,
+              scale: 1.01,
+              y: -6,
+              filter: "blur(8px)",
+              transition: {
+                duration: shouldReduceMotion ? 0 : 0.48,
+                ease: "easeInOut",
+              },
+            }}
+            initial={{
+              opacity: 0,
+              scale: 0.985,
+              y: 8,
+              filter: "blur(8px)",
+            }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.5,
+              ease: "easeInOut",
+            }}
+          >
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center"
+              initial={{ opacity: 0, y: 22 }}
+              transition={{
+                delay: shouldReduceMotion ? 0 : 0.12,
+                duration: shouldReduceMotion ? 0 : 0.65,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              <h1 className="display-type text-[clamp(3.35rem,11.4vw,8.6rem)] leading-[0.82] tracking-[0.015em] text-white [text-shadow:0_8px_50px_rgba(0,0,0,0.65)]">
+                TORQUI
+                <span className="text-cyan-200 drop-shadow-[0_0_24px_rgba(103,232,249,0.38)]">
+                  RS
+                </span>
+              </h1>
+              <p className="mt-5 max-w-lg text-xs leading-6 text-white/55 sm:mt-6 sm:text-sm sm:leading-7">
+                A next-generation gaming hub for cinematic worlds, competitive
+                arenas, and unforgettable play.
+              </p>
+              <Button
+                className="group relative mt-7 min-h-12 min-w-56 overflow-hidden px-7 text-[10px] tracking-[0.2em] sm:mt-8"
+                onClick={startExperience}
+                type="button"
+                variant="default"
+              >
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                <span className="relative">INITIALIZE SYSTEM</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="relative transition-transform duration-200 group-hover:translate-x-1"
+                  size={15}
+                />
+              </Button>
+            </motion.div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
       {profile && (
-        <Popover open={profilePopoverOpen} onOpenChange={setProfilePopoverOpen}>
+        <Popover
+          open={profilePopoverOpen}
+          onOpenChange={(open) => {
+            if (!isDeleting) {
+              setProfilePopoverOpen(open);
+            }
+          }}
+        >
           <PopoverTrigger asChild>
             <Button
               aria-label={`Player profile for ${profile.username}`}
@@ -298,15 +437,48 @@ export function GamesPlayerProfile() {
                       size={17}
                     />
                   </div>
+                  {storageError && (
+                    <p
+                      aria-live="polite"
+                      className="mx-3 mb-2 rounded-md border border-red-300/15 bg-red-400/[0.06] px-2.5 py-2 text-[10px] leading-4 text-red-100/80"
+                      role="alert"
+                    >
+                      {storageError}
+                    </p>
+                  )}
                   <div className="border-t border-white/10 p-1.5">
                     <Button
                       className="w-full justify-start text-[10px] tracking-[0.12em]"
                       onClick={startEditing}
+                      disabled={isDeleting}
                       size="sm"
                       variant="ghost"
                     >
                       <Pencil aria-hidden="true" size={14} />
                       EDIT PLAYER PROFILE
+                    </Button>
+                    <Button
+                      aria-busy={isDeleting}
+                      className={`w-full justify-start text-[10px] tracking-[0.12em] text-red-200/80 transition-[color,background-color,box-shadow] ${
+                        isDeleting
+                          ? "bg-red-400/[0.08] text-red-100 shadow-[0_0_18px_rgba(248,113,113,0.12)]"
+                          : "hover:border-red-300/20 hover:bg-red-400/[0.08] hover:text-red-100"
+                      }`}
+                      onClick={deleteProfile}
+                      disabled={isDeleting}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      {isDeleting ? (
+                        <LoaderCircle
+                          aria-hidden="true"
+                          className="animate-spin"
+                          size={14}
+                        />
+                      ) : (
+                        <Trash2 aria-hidden="true" size={14} />
+                      )}
+                      {isDeleting ? "DELETING..." : "DELETE PROFILE"}
                     </Button>
                   </div>
                 </motion.div>
